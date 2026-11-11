@@ -1,0 +1,1422 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espetinho Gestão | Controle do Campeonato</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:#f4f6f2;--surface:#fff;--surface2:#f8faf7;
+  --green:#174c35;--green2:#216b48;--green3:#e8f3eb;
+  --gold:#e9ad38;--gold2:#fff5dc;--text:#17251d;
+  --muted:#718078;--border:#e5ebe5;--red:#c84c4c;
+  --blue:#3977b8;--purple:#8058ae;
+  --shadow:0 8px 28px rgba(20,50,32,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:flex}
+.sidebar{width:250px;background:var(--green);color:white;padding:25px 17px;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:10}
+.brand{display:flex;align-items:center;gap:12px;padding:0 9px 28px;border-bottom:1px solid #ffffff22}
+.brand-icon{width:43px;height:43px;background:var(--gold);border-radius:14px;display:grid;place-items:center;font-size:23px}
+.brand h1{font:700 19px Outfit;margin:0}
+.brand small{color:#c5d8cc;font-size:11px}
+.menu-label{font-size:10px;letter-spacing:1.5px;color:#9fbeaa;font-weight:800;padding:25px 11px 9px}
+.nav{display:grid;gap:5px}
+.nav button{border:0;background:transparent;color:#d7e5db;text-align:left;padding:12px 13px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:12px;transition:.2s}
+.nav button:hover,.nav button.active{background:#ffffff19;color:#fff}
+.nav button.active{box-shadow:inset 3px 0 var(--gold)}
+.nav .ico{width:21px;text-align:center;font-size:17px}
+.sidebar-bottom{margin-top:auto;padding:15px 10px;border-top:1px solid #ffffff22;color:#c5d8cc;font-size:11px;line-height:1.6}
+.main{margin-left:250px;width:calc(100% - 250px);min-width:0}
+.topbar{height:76px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 34px;position:sticky;top:0;z-index:5}
+.top-title h2{font:700 20px Outfit;margin:0}
+.top-title p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.top-right{display:flex;align-items:center;gap:12px}
+.status{background:var(--green3);color:var(--green2);padding:8px 12px;border-radius:30px;font-size:11px;font-weight:700}
+.avatar{width:37px;height:37px;border-radius:50%;background:var(--gold2);display:grid;place-items:center;font-size:18px}
+.content{padding:28px 34px 45px;max-width:1600px;margin:auto}
+.page{display:none}.page.active{display:block}
+.page-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:23px}
+.page-heading h2{font:700 23px Outfit;margin:0}
+.page-heading p{color:var(--muted);font-size:13px;margin:6px 0 0}
+.eyebrow{color:var(--green2);font-size:10px;font-weight:800;letter-spacing:1.5px;margin-bottom:7px}
+.grid{display:grid;gap:17px}
+.metrics{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:20px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:19px;box-shadow:var(--shadow)}
+.metric-top{display:flex;justify-content:space-between;align-items:center}
+.metric-label{font-size:11px;color:var(--muted);font-weight:700}
+.metric-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px}
+.metric-value{font:700 24px Outfit;margin-top:13px}
+.metric-note{font-size:10px;color:var(--muted);margin-top:5px}
+.green-bg{background:#e8f3eb;color:var(--green2)}
+.gold-bg{background:#fff3d8;color:#a56d0b}
+.red-bg{background:#ffeded;color:var(--red)}
+.blue-bg{background:#eaf2fc;color:var(--blue)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:15px;box-shadow:var(--shadow);overflow:hidden}
+.panel-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.panel-head h3{font:700 15px Outfit;margin:0}
+.panel-head p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.panel-body{padding:20px}
+.two-col{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:18px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:11px;font-weight:700;color:#53645a}
+input,select{border:1px solid var(--border);border-radius:9px;padding:11px 12px;background:#fff;color:var(--text);outline:none;min-width:0}
+input:focus,select:focus{border-color:var(--green2);box-shadow:0 0 0 3px #216b4812}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end}
+.btn{border:0;border-radius:9px;padding:11px 15px;font-size:12px;font-weight:700;transition:.2s}
+.btn:hover{filter:brightness(.96);transform:translateY(-1px)}
+.btn-primary{background:var(--green);color:white}
+.btn-gold{background:var(--gold);color:#30230a}
+.btn-light{background:#edf2ed;color:var(--green)}
+.btn-danger{background:#fff0f0;color:var(--red)}
+.btn-blue{background:#eaf2fc;color:var(--blue)}
+.btn-small{padding:7px 10px;font-size:10px}
+.btn-block{width:100%}
+.event-row{display:flex;align-items:end;gap:12px;margin-bottom:17px;flex-wrap:wrap}
+.event-row .field{max-width:220px}
+.helper{font-size:11px;color:var(--muted)}
+.customer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px}
+.customer-card{background:#fff;border:1px solid var(--border);border-radius:11px;padding:11px;display:flex;align-items:center;gap:9px;text-align:left;min-width:0}
+.customer-card.selected{border:2px solid var(--gold);background:#fffaf0;padding:10px}
+.customer-card .emoji{font-size:24px}
+.customer-card strong{font-size:11px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.customer-card small{font-size:9px;color:var(--muted)}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:9px}
+.product-button{border:1px solid var(--border);background:#fff;border-radius:11px;padding:13px 10px;text-align:left;min-height:85px;display:flex;flex-direction:column;justify-content:space-between}
+.product-button:hover{border-color:var(--gold);background:#fffaf0}
+.product-button strong{font-size:11px}
+.product-button span{font:700 13px Outfit;color:var(--green2)}
+.customer-name{font:700 17px Outfit}
+.balance{font-size:11px;color:var(--red);font-weight:700;margin-top:4px}
+.order-list{display:grid;gap:8px}
+.order-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:12px}
+.quantity{display:flex;align-items:center;gap:7px}
+.quantity button{width:25px;height:25px;border:0;border-radius:7px;background:#e8eee8;font-weight:800}
+.total-line{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-top:1px solid var(--border);margin-top:14px}
+.total-line strong{font:700 23px Outfit}
+.pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+.pay-grid button{padding:12px 5px;border:0;border-radius:9px;color:#fff;font-size:11px;font-weight:800}
+.pay-pix{background:#16865c}.pay-cash{background:#3977b8}.pay-card{background:#8058ae}
+.tag{display:inline-flex;padding:5px 8px;border-radius:20px;font-size:9px;font-weight:800}
+.tag-green{background:#e8f3eb;color:#216b48}
+.tag-red{background:#ffeded;color:#c84c4c}
+.tag-gold{background:#fff3d8;color:#a56d0b}
+.list{display:grid;gap:9px}
+.list-row{padding:13px 15px;border:1px solid var(--border);border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff}
+.list-row strong{font-size:12px}
+.list-row small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.list-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.empty{padding:35px 15px;text-align:center;color:var(--muted);font-size:12px}
+.empty span{display:block;font-size:28px;margin-bottom:8px}
+.highlight{background:var(--green);color:white;border-radius:15px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:15px;margin:20px 0}
+.highlight small{color:#c4d8ca;font-size:10px;font-weight:700;letter-spacing:1px}
+.highlight strong{font:700 30px Outfit}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{text-align:left;padding:13px 15px;border-bottom:1px solid var(--border);font-size:11px}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);background:var(--surface2)}
+td{color:#394a40}
+.profit-card{padding:14px;border:1px solid var(--border);border-radius:11px;background:var(--surface2);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.profit-card strong{font-size:12px}
+.profit-card small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+.profit-value{text-align:right;font-weight:800;color:var(--green2);font-size:13px}
+.section-gap{margin-top:20px}
+.notice{padding:12px 14px;border-radius:10px;background:var(--gold2);color:#805d1d;font-size:11px;margin-bottom:15px;line-height:1.5}
+.mobile-menu{display:none;background:var(--green);color:white;border:0;border-radius:8px;padding:8px 11px}
+
+/* NOVOS GRAFICOS */
+.charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+.chart-panel{background:var(--surface);border:1px solid var(--border);border-radius:15px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.chart-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chart-head h3{font:700 15px Outfit;margin:0}
+.chart-head p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.chart-body{height:290px;padding:18px;position:relative}
+.chart-filter{padding:8px 10px;font-size:11px;max-width:135px}
+.chart-info{font-size:10px;color:var(--muted);padding:0 20px 15px}
+
+@media(max-width:1100px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .content{padding:23px}
+  .topbar{padding:0 23px}
+}
+@media(max-width:800px){
+  .sidebar{width:250px;transform:translateX(-100%);transition:.25s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;width:100%}
+  .mobile-menu{display:block}
+  .topbar{height:66px;padding:0 15px}
+  .content{padding:18px 14px 35px}
+  .two-col{grid-template-columns:1fr}
+  .page-heading h2{font-size:20px}
+  .charts-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .metric{padding:13px}
+  .metric-value{font-size:19px}
+  .metric-label{font-size:9px}
+  .metric-note{font-size:9px}
+  .form-grid{grid-template-columns:1fr}
+  .highlight{padding:17px}
+  .highlight strong{font-size:23px}
+  .page-heading{flex-direction:column}
+  .customer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chart-body{height:250px;padding:12px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🔥</div>
+    <div><h1>Espetinho Gestão</h1><small>Controle do Campeonato</small></div>
+  </div>
+  <div class="menu-label">MENU PRINCIPAL</div>
+  <nav class="nav">
+    <button class="active" data-page="comandas"><span class="ico">🧾</span> Comandas e vendas</button>
+    <button data-page="financeiro"><span class="ico">📊</span> Financeiro e lucro</button>
+    <button data-page="compras"><span class="ico">🛒</span> Compras e gastos</button>
+    <button data-page="devedores"><span class="ico">💳</span> Fiados e pendências</button>
+    <button data-page="historico"><span class="ico">🕘</span> Pagamentos</button>
+    <button data-page="clientes"><span class="ico">👥</span> Clientes</button>
+    <button data-page="produtos"><span class="ico">📦</span> Produtos</button>
+  </nav>
+  <div class="sidebar-bottom">🔥 <strong>Espetinho Gestão</strong><br>Controle das vendas do campeonato.<br><span id="today-label"></span></div>
+</aside>
+
+<div class="main">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu" onclick="toggleMenu()">☰</button>
+    <div class="top-title"><h2 id="top-heading">Comandas e vendas</h2><p>Gerencie seu comércio durante o campeonato</p></div>
+  </div>
+  <div class="top-right"><span class="status">● Sistema ativo</span><div class="avatar">🏆</div></div>
+</header>
+
+<main class="content">
+
+<!-- COMANDAS -->
+<section class="page active" id="page-comandas">
+  <div class="page-heading">
+    <div><div class="eyebrow">OPERAÇÃO DE VENDAS</div><h2>Comandas e vendas</h2><p>Selecione o cliente, marque os produtos e lance o consumo.</p></div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-top"><span class="metric-label">TOTAL A RECEBER</span><span class="metric-icon red-bg">💰</span></div><div class="metric-value" id="quick-debt">R$ 0,00</div><div class="metric-note">Fiados em aberto</div></div>
+    <div class="metric"><div class="metric-top"><span class="metric-label">CLIENTES</span><span class="metric-icon blue-bg">👥</span></div><div class="metric-value" id="quick-clients">0</div><div class="metric-note">Clientes cadastrados</div></div>
+    <div class="metric"><div class="metric-top"><span class="metric-label">PRODUTOS</span><span class="metric-icon gold-bg">📦</span></div><div class="metric-value" id="quick-products">0</div><div class="metric-note">Produtos disponíveis</div></div>
+    <div class="metric"><div class="metric-top"><span class="metric-label">PAGAMENTOS</span><span class="metric-icon green-bg">✓</span></div><div class="metric-value" id="quick-payments">0</div><div class="metric-note">Recebimentos registrados</div></div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-head"><div><h3>Nova comanda</h3><p>Escolha o evento e o cliente</p></div><span class="tag tag-gold">ETAPA 1 E 2</span></div>
+      <div class="panel-body">
+        <div class="event-row">
+          <div class="field"><label>Data do evento</label><input type="date" id="event-date"></div>
+          <div class="helper" id="event-day"></div>
+        </div>
+        <div class="notice">As vendas e os lançamentos de consumo são permitidos somente aos domingos. Você pode consultar datas anteriores e receber pagamentos em qualquer dia.</div>
+        <div class="eyebrow">SELECIONE O CLIENTE</div>
+        <div class="customer-grid" id="customer-picker"></div>
+        <div class="section-gap">
+          <div class="eyebrow">PRODUTOS DISPONÍVEIS</div>
+          <div class="product-grid" id="product-picker"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div><h3>Resumo da comanda</h3><p>Consumo selecionado para o evento</p></div><span class="tag tag-green">COMANDA</span></div>
+      <div class="panel-body">
+        <div class="customer-name" id="selected-customer">👤 Selecione um cliente</div>
+        <div class="balance" id="selected-balance">Saldo acumulado: R$ 0,00</div>
+        <div class="section-gap"><div class="eyebrow">ITENS DA COMANDA</div><div class="order-list" id="order-items"></div></div>
+        <div class="total-line"><span style="font-size:12px;font-weight:700">Total deste evento</span><strong id="order-total">R$ 0,00</strong></div>
+        <button class="btn btn-primary btn-block" onclick="lancarNaConta()">＋ Lançar consumo na conta</button>
+        <div class="section-gap" style="display:flex;justify-content:space-between;align-items:center"><strong style="font:700 13px Outfit">Débitos anteriores</strong><button class="btn btn-light btn-small" onclick="copiarExtratoWhatsApp()">📋 Copiar extrato</button></div>
+        <div class="list section-gap" id="customer-debts"></div>
+        <div class="section-gap"><button class="btn btn-danger btn-block" onclick="limparConsumoHoje()">Limpar comanda atual</button></div>
+        <div class="section-gap"><div class="eyebrow">RECEBER PAGAMENTO</div>
+          <div class="pay-grid">
+            <button class="pay-pix" onclick="receberPagamento('Pix')">PIX</button>
+            <button class="pay-cash" onclick="receberPagamento('Dinheiro')">DINHEIRO</button>
+            <button class="pay-card" onclick="receberPagamento('Cartão')">CARTÃO</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINANCEIRO -->
+<section class="page" id="page-financeiro">
+  <div class="page-heading">
+    <div><div class="eyebrow">VISÃO FINANCEIRA</div><h2>Financeiro e lucro</h2><p>Acompanhe vendas, recebimentos, dívidas e despesas.</p></div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-top"><span class="metric-label">TOTAL VENDIDO</span><span class="metric-icon blue-bg">📈</span></div><div class="metric-value" id="stat-sales">R$ 0,00</div><div class="metric-note">Vendas registradas</div></div>
+    <div class="metric"><div class="metric-top"><span class="metric-label">RECEBIDO</span><span class="metric-icon green-bg">💵</span></div><div class="metric-value" id="stat-received">R$ 0,00</div><div class="metric-note">Pagamentos recebidos</div></div>
+    <div class="metric"><div class="metric-top"><span class="metric-label">FIADO PENDENTE</span><span class="metric-icon gold-bg">📒</span></div><div class="metric-value" id="stat-debt">R$ 0,00</div><div class="metric-note">Saldo dos clientes</div></div>
+    <div class="metric"><div class="metric-top"><span class="metric-label">COMPRAS E GASTOS</span><span class="metric-icon red-bg">🛒</span></div><div class="metric-value" id="stat-expenses">R$ 0,00</div><div class="metric-note">Despesas registradas</div></div>
+  </div>
+
+  <div class="highlight">
+    <div><small>RESULTADO DA OPERAÇÃO</small><div style="font-size:12px;color:#d0e1d5;margin-top:6px">Total vendido menos compras e gastos</div></div>
+    <strong id="stat-profit">R$ 0,00</strong>
+  </div>
+
+  <!-- NOVOS GRAFICOS -->
+  <div class="page-heading" style="margin-top:28px;margin-bottom:12px">
+    <div><div class="eyebrow">ACOMPANHAMENTO</div><h2 style="font-size:19px">Gráficos financeiros</h2><p>Visualize a evolução das vendas e do resultado da operação.</p></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-panel">
+      <div class="chart-head">
+        <div><h3>📈 Gráfico de vendas</h3><p>Valor total vendido por período</p></div>
+        <select id="filtro-vendas" class="chart-filter" onchange="atualizarGraficos()">
+          <option value="7">Últimos 7 dias</option>
+          <option value="30" selected>Últimos 30 dias</option>
+          <option value="90">Últimos 90 dias</option>
+          <option value="365">Último ano</option>
+        </select>
+      </div>
+      <div class="chart-body"><canvas id="grafico-vendas"></canvas></div>
+      <div class="chart-info">Considera os consumos lançados nas comandas.</div>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-head">
+        <div><h3>💰 Gráfico de lucro</h3><p>Vendas menos compras e gastos</p></div>
+        <select id="filtro-lucro" class="chart-filter" onchange="atualizarGraficos()">
+          <option value="7">Últimos 7 dias</option>
+          <option value="30" selected>Últimos 30 dias</option>
+          <option value="90">Últimos 90 dias</option>
+          <option value="365">Último ano</option>
+        </select>
+      </div>
+      <div class="chart-body"><canvas id="grafico-lucro"></canvas></div>
+      <div class="chart-info">O resultado diário é calculado subtraindo as despesas registradas das vendas.</div>
+    </div>
+  </div>
+
+  <div class="panel section-gap">
+    <div class="panel-head"><div><h3>Margem por produto</h3><p>Comparação entre custo e preço de venda</p></div></div>
+    <div class="panel-body"><div class="grid" id="profit-products" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))"></div></div>
+  </div>
+</section>
+
+<!-- COMPRAS -->
+<section class="page" id="page-compras">
+  <div class="page-heading"><div><div class="eyebrow">CONTROLE DE DESPESAS</div><h2>Compras e gastos</h2><p>Registre os valores utilizados para abastecer o comércio.</p></div></div>
+  <div class="panel">
+    <div class="panel-head"><div><h3>Novo gasto ou compra</h3><p>Informe a descrição, valor e data.</p></div></div>
+    <div class="panel-body">
+      <form class="form-grid" onsubmit="salvarCompra(event)">
+        <div class="field"><label>Descrição</label><input id="input-desc-compra" placeholder="Ex.: carvão, bebidas, carnes" required></div>
+        <div class="field"><label>Valor (R$)</label><input id="input-valor-compra" type="number" min="0.01" step="0.01" placeholder="0,00" required></div>
+        <div class="field"><label>Data</label><input id="input-data-compra" type="date" required></div>
+        <button class="btn btn-primary" type="submit">＋ Registrar gasto</button>
+      </form>
+    </div>
+  </div>
+  <div class="panel section-gap">
+    <div class="panel-head"><div><h3>Histórico de compras e gastos</h3><p>Todos os lançamentos registrados.</p></div><strong id="total-compras">R$ 0,00</strong></div>
+    <div class="panel-body"><div class="list" id="lista-compras"></div></div>
+  </div>
+</section>
+
+<!-- DEVEDORES -->
+<section class="page" id="page-devedores">
+  <div class="page-heading"><div><div class="eyebrow">CONTAS A RECEBER</div><h2>Fiados e pendências</h2><p>Consulte quem está devendo e confira os valores por evento.</p></div></div>
+  <div class="panel">
+    <div class="panel-head"><div><h3>Filtrar pendências</h3><p>Veja o acumulado ou escolha uma data específica.</p></div>
+      <div class="field"><label>Data do evento</label><select id="filter-debt-date" onchange="renderizarDevedores()"><option value="">Todas as datas</option></select></div>
+    </div>
+    <div class="panel-body">
+      <div class="metric" style="margin-bottom:17px"><div class="metric-label">TOTAL PENDENTE NO FILTRO</div><div class="metric-value" id="total-a-receber">R$ 0,00</div></div>
+      <div class="grid" id="lista-devedores" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))"></div>
+    </div>
+  </div>
+</section>
+
+<!-- HISTÓRICO -->
+<section class="page" id="page-historico">
+  <div class="page-heading"><div><div class="eyebrow">MOVIMENTAÇÕES</div><h2>Histórico de pagamentos</h2><p>Consulte os recebimentos e faça estornos quando necessário.</p></div></div>
+  <div class="panel">
+    <div class="panel-head"><div><h3>Pagamentos registrados</h3><p>Filtre por cliente para localizar um recebimento.</p></div>
+      <div class="field"><label>Cliente</label><select id="filter-payment-client" onchange="renderizarHistorico()"><option value="">Todos os clientes</option></select></div>
+    </div>
+    <div class="panel-body">
+      <div class="metric" style="margin-bottom:17px"><div class="metric-label">TOTAL RECEBIDO NO FILTRO</div><div class="metric-value" id="total-arrecadado">R$ 0,00</div></div>
+      <div class="list" id="lista-pagamentos"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTES -->
+<section class="page" id="page-clientes">
+  <div class="page-heading"><div><div class="eyebrow">CADASTROS</div><h2>Clientes</h2><p>Cadastre e organize os clientes do campeonato.</p></div></div>
+  <div class="panel">
+    <div class="panel-head"><div><h3>Novo cliente</h3><p>Escolha um nome e um ícone para identificar a pessoa.</p></div></div>
+    <div class="panel-body">
+      <form class="form-grid" onsubmit="salvarCliente(event)">
+        <div class="field"><label>Nome do cliente</label><input id="input-nome-cliente" placeholder="Nome completo" required></div>
+        <div class="field"><label>Ícone</label><select id="select-emoji-cliente"></select></div>
+        <button class="btn btn-primary" type="submit">＋ Adicionar cliente</button>
+      </form>
+    </div>
+  </div>
+  <div class="panel section-gap">
+    <div class="panel-head"><div><h3>Clientes cadastrados</h3><p id="client-count">0 clientes</p></div></div>
+    <div class="panel-body"><div class="list" id="lista-clientes"></div></div>
+  </div>
+</section>
+
+<!-- PRODUTOS -->
+<section class="page" id="page-produtos">
+  <div class="page-heading"><div><div class="eyebrow">CATÁLOGO</div><h2>Produtos</h2><p>Gerencie os itens vendidos e suas margens.</p></div></div>
+  <div class="panel">
+    <div class="panel-head"><div><h3>Cadastrar produto</h3><p>Informe o custo de compra e o preço de venda.</p></div></div>
+    <div class="panel-body">
+      <form class="form-grid" onsubmit="salvarProduto(event)">
+        <div class="field"><label>Nome do produto</label><input id="input-nome-prod" placeholder="Ex.: Espetinho" required></div>
+        <div class="field"><label>Custo unitário (R$)</label><input id="input-custo-prod" type="number" min="0" step="0.01" placeholder="0,00" required></div>
+        <div class="field"><label>Preço de venda (R$)</label><input id="input-preco-prod" type="number" min="0.01" step="0.01" placeholder="0,00" required></div>
+        <button class="btn btn-primary" type="submit">＋ Adicionar produto</button>
+      </form>
+    </div>
+  </div>
+  <div class="panel section-gap">
+    <div class="panel-head"><div><h3>Produtos cadastrados</h3><p id="product-count">0 produtos</p></div></div>
+    <div class="panel-body"><div class="list" id="lista-produtos"></div></div>
+  </div>
+</section>
+
+</main>
+</div>
+</div>
+
+<script>
+const EMOJIS=['😎','🤠','🥳','😀','😍','🤩','😋','🤖','🍻','🍺','🥂','🍹','🍔','🍕','🌭','🍟','🥩','🍖','🍿','🍓','🍦','🍩','⚽','🏆','🔥','⭐','👑','🚀'];
+
+const carregar=(chave,padrao)=>{
+  try{return JSON.parse(localStorage.getItem(chave))??padrao}
+  catch{return padrao}
+};
+
+let db={
+  clientes:carregar('db_clientes',[
+    {id:'1',nome:'João',emoji:'😎'},
+    {id:'2',nome:'Maria',emoji:'🤠'},
+    {id:'3',nome:'Lucas',emoji:'🍻'}
+  ]),
+  produtos:carregar('db_produtos',[
+    {id:1,nome:'Cerveja Lata',custo:2.5,preco:6},
+    {id:2,nome:'Espetinho',custo:4,preco:10},
+    {id:3,nome:'Refrigerante',custo:2,preco:5}
+  ]),
+  compras:carregar('db_compras',[]),
+  consumoHoje:carregar('db_consumo_hoje',{}),
+  saldos:carregar('db_saldos',{}),
+  pagamentos:carregar('db_pagamentos',[]),
+
+  // NOVO: histórico permanente das vendas para alimentar os gráficos
+  vendas:carregar('db_vendas',[])
+};
+
+let clienteAtual=null;
+let graficoVendas=null;
+let graficoLucro=null;
+
+const $=id=>document.getElementById(id);
+const dinheiro=v=>(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const hojeISO=()=>{
+  const d=new Date();
+  d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+  return d.toISOString().slice(0,10);
+};
+const formatarData=data=>data?data.split('-').reverse().join('/'):'';
+const escapar=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const saldoCliente=nome=>Number(db.saldos[nome]?.total)||0;
+const historicoCliente=nome=>db.saldos[nome]?.historico||[];
+const chaveConsumo=(nome,data)=>`${nome}_${data}`;
+
+function salvarLocal(){
+  localStorage.setItem('db_clientes',JSON.stringify(db.clientes));
+  localStorage.setItem('db_produtos',JSON.stringify(db.produtos));
+  localStorage.setItem('db_compras',JSON.stringify(db.compras));
+  localStorage.setItem('db_consumo_hoje',JSON.stringify(db.consumoHoje));
+  localStorage.setItem('db_saldos',JSON.stringify(db.saldos));
+  localStorage.setItem('db_pagamentos',JSON.stringify(db.pagamentos));
+  localStorage.setItem('db_vendas',JSON.stringify(db.vendas));
+}
+
+function toggleMenu(){
+  $('sidebar').classList.toggle('open');
+}
+
+document.querySelectorAll('.nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>mudarAba(btn.dataset.page));
+});
+
+function mudarAba(pagina){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>{
+    b.classList.toggle('active',b.dataset.page===pagina);
+  });
+
+  $('page-'+pagina).classList.add('active');
+
+  const nomes={
+    comandas:'Comandas e vendas',
+    financeiro:'Financeiro e lucro',
+    compras:'Compras e gastos',
+    devedores:'Fiados e pendências',
+    historico:'Histórico de pagamentos',
+    clientes:'Clientes',
+    produtos:'Produtos'
+  };
+
+  $('top-heading').textContent=nomes[pagina];
+  $('sidebar').classList.remove('open');
+  renderizarTudo();
+
+  if(pagina==='financeiro'){
+    setTimeout(atualizarGraficos,100);
+  }
+}
+
+function preencherEmojis(){
+  $('select-emoji-cliente').innerHTML=EMOJIS.map(e=>`<option value="${e}">${e}</option>`).join('');
+}
+
+function selecionarCliente(nome){
+  clienteAtual=nome;
+  renderizarTudo();
+}
+
+function atualizarDataEvento(){
+  const data=$('event-date').value;
+  if(!data)return;
+
+  const d=new Date(data+'T12:00:00');
+  const domingo=d.getDay()===0;
+
+  $('event-day').innerHTML=domingo
+    ?'<span class="tag tag-green">✓ Domingo</span>'
+    :'<span class="tag tag-red">⚠ Não é domingo</span>';
+}
+
+function adicionarItem(id){
+  if(!clienteAtual)return alert('Selecione um cliente primeiro.');
+
+  const data=$('event-date').value;
+  if(!data)return alert('Selecione a data do evento.');
+
+  if(new Date(data+'T12:00:00').getDay()!==0){
+    return alert('Novas vendas só podem ser lançadas aos domingos.');
+  }
+
+  const produto=db.produtos.find(p=>Number(p.id)===Number(id));
+  if(!produto)return alert('Produto não encontrado.');
+
+  const chave=chaveConsumo(clienteAtual,data);
+
+  if(!db.consumoHoje[chave])db.consumoHoje[chave]=[];
+
+  const item=db.consumoHoje[chave].find(i=>Number(i.produtoId)===Number(id));
+
+  if(item)item.qtd++;
+  else db.consumoHoje[chave].push({produtoId:Number(id),qtd:1});
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function alterarQtd(id,delta){
+  const data=$('event-date').value;
+
+  if(new Date(data+'T12:00:00').getDay()!==0){
+    return alert('A alteração de vendas só pode ser feita aos domingos.');
+  }
+
+  const chave=chaveConsumo(clienteAtual,data);
+  const itens=db.consumoHoje[chave]||[];
+  const item=itens.find(i=>Number(i.produtoId)===Number(id));
+
+  if(!item)return;
+
+  item.qtd+=delta;
+  db.consumoHoje[chave]=itens.filter(i=>i.qtd>0);
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function totalComanda(nome,data){
+  return (db.consumoHoje[chaveConsumo(nome,data)]||[]).reduce((s,i)=>{
+    const p=db.produtos.find(p=>Number(p.id)===Number(i.produtoId));
+    return s+(p?Number(p.preco)*Number(i.qtd):0);
+  },0);
+}
+
+function lancarNaConta(){
+  if(!clienteAtual)return alert('Selecione um cliente.');
+
+  const data=$('event-date').value;
+  if(!data)return alert('Selecione a data do evento.');
+
+  if(new Date(data+'T12:00:00').getDay()!==0){
+    return alert('O lançamento de consumo só pode ser realizado aos domingos.');
+  }
+
+  const chave=chaveConsumo(clienteAtual,data);
+  const itens=db.consumoHoje[chave]||[];
+
+  if(!itens.length)return alert('Adicione pelo menos um produto à comanda.');
+
+  if(!db.saldos[clienteAtual]){
+    db.saldos[clienteAtual]={total:0,historico:[]};
+  }
+
+  let total=0;
+  let custoTotal=0;
+  const itensVenda=[];
+
+  itens.forEach(item=>{
+    const p=db.produtos.find(p=>Number(p.id)===Number(item.produtoId));
+    if(!p)return;
+
+    const valor=Number(p.preco)*Number(item.qtd);
+    const custo=Number(p.custo)*Number(item.qtd);
+
+    total+=valor;
+    custoTotal+=custo;
+
+    itensVenda.push({
+      produtoId:p.id,
+      nome:p.nome,
+      quantidade:item.qtd,
+      precoUnitario:Number(p.preco),
+      custoUnitario:Number(p.custo),
+      total:valor
+    });
+
+    db.saldos[clienteAtual].historico.push({
+      id:Date.now()+Math.random(),
+      data:formatarData(data),
+      dataIso:data,
+      descricao:`${item.qtd}x ${p.nome}`,
+      valor
+    });
+  });
+
+  db.saldos[clienteAtual].total=saldoCliente(clienteAtual)+total;
+
+  // NOVO: registra a venda separadamente.
+  // Assim ela continua nos gráficos mesmo após o cliente pagar.
+  db.vendas.push({
+    id:Date.now()+Math.random(),
+    cliente:clienteAtual,
+    data:data,
+    valor:Number(total.toFixed(2)),
+    custo:Number(custoTotal.toFixed(2)),
+    lucro:Number((total-custoTotal).toFixed(2)),
+    itens:itensVenda
+  });
+
+  delete db.consumoHoje[chave];
+
+  salvarLocal();
+
+  alert(`Consumo de ${dinheiro(total)} lançado para ${clienteAtual}.`);
+
+  renderizarTudo();
+}
+
+function limparConsumoHoje(){
+  if(!clienteAtual)return alert('Selecione um cliente.');
+
+  const data=$('event-date').value;
+
+  if(!confirm('Deseja limpar os itens desta comanda?'))return;
+
+  delete db.consumoHoje[chaveConsumo(clienteAtual,data)];
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function receberPagamento(meio){
+  if(!clienteAtual)return alert('Selecione um cliente primeiro.');
+
+  const saldo=saldoCliente(clienteAtual);
+
+  if(saldo<=0)return alert('Este cliente não possui débitos pendentes.');
+
+  const resposta=prompt(
+    `Saldo de ${clienteAtual}: ${dinheiro(saldo)}\nDigite o valor recebido:`,
+    saldo.toFixed(2)
+  );
+
+  if(resposta===null)return;
+
+  const valor=Number(resposta.replace(',','.'));
+
+  if(!Number.isFinite(valor)||valor<=0)return alert('Informe um valor válido.');
+  if(valor>saldo+0.001)return alert('O pagamento não pode ser maior que o saldo devedor.');
+
+  const backup=JSON.parse(JSON.stringify(historicoCliente(clienteAtual)));
+
+  db.saldos[clienteAtual].total=Math.max(0,Number((saldo-valor).toFixed(2)));
+
+  if(db.saldos[clienteAtual].total===0){
+    db.saldos[clienteAtual].historico=[];
+  }
+
+  db.pagamentos.unshift({
+    id:Date.now(),
+    cliente:clienteAtual,
+    data:new Date().toLocaleString('pt-BR'),
+    valor,
+    formaPagamento:meio,
+    historicoBackup:backup
+  });
+
+  salvarLocal();
+  renderizarTudo();
+
+  alert(`Pagamento de ${dinheiro(valor)} recebido via ${meio}.`);
+}
+
+function estornarPagamento(id){
+  const p=db.pagamentos.find(p=>Number(p.id)===Number(id));
+  if(!p)return;
+
+  if(!confirm(`Estornar ${dinheiro(p.valor)} recebido de ${p.cliente}?\nO valor voltará para a dívida.`))return;
+
+  if(!db.saldos[p.cliente]){
+    db.saldos[p.cliente]={total:0,historico:[]};
+  }
+
+  db.saldos[p.cliente].total=Number((saldoCliente(p.cliente)+Number(p.valor)).toFixed(2));
+
+  if(p.historicoBackup?.length){
+    db.saldos[p.cliente].historico=JSON.parse(JSON.stringify(p.historicoBackup));
+  }
+
+  db.pagamentos=db.pagamentos.filter(x=>Number(x.id)!==Number(id));
+
+  salvarLocal();
+  renderizarTudo();
+
+  alert('Estorno realizado.');
+}
+
+function copiarExtratoWhatsApp(){
+  if(!clienteAtual)return alert('Selecione um cliente.');
+
+  const saldo=saldoCliente(clienteAtual);
+  if(saldo<=0)return alert('Este cliente está com a conta quitada.');
+
+  const historico=historicoCliente(clienteAtual);
+
+  let texto=`*EXTRATO DE CONTA*\n👤 Cliente: ${clienteAtual}\n💰 Saldo pendente: ${dinheiro(saldo)}\n\n*Consumo por evento:*\n`;
+
+  historico.forEach(h=>{
+    texto+=`• ${h.data}: ${h.descricao} - ${dinheiro(h.valor)}\n`;
+  });
+
+  texto+='\nObrigado pela preferência!';
+
+  if(navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(texto)
+      .then(()=>alert('Extrato copiado! Agora é só colar no WhatsApp.'))
+      .catch(()=>prompt('Copie o extrato:',texto));
+  }else{
+    prompt('Copie o extrato:',texto);
+  }
+}
+
+function salvarCompra(e){
+  e.preventDefault();
+
+  const descricao=$('input-desc-compra').value.trim();
+  const valor=Number($('input-valor-compra').value);
+  const data=$('input-data-compra').value||hojeISO();
+
+  if(!descricao||!Number.isFinite(valor)||valor<=0){
+    return alert('Preencha a descrição e um valor válido.');
+  }
+
+  db.compras.unshift({
+    id:Date.now(),
+    descricao,
+    valor,
+    data,
+    dataBR:formatarData(data)
+  });
+
+  salvarLocal();
+  e.target.reset();
+  $('input-data-compra').value=hojeISO();
+  renderizarTudo();
+}
+
+function removerCompra(id){
+  if(!confirm('Excluir este gasto?'))return;
+
+  db.compras=db.compras.filter(c=>Number(c.id)!==Number(id));
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function salvarCliente(e){
+  e.preventDefault();
+
+  const nome=$('input-nome-cliente').value.trim();
+  const emoji=$('select-emoji-cliente').value;
+
+  if(!nome)return;
+
+  if(db.clientes.some(c=>c.nome.toLowerCase()===nome.toLowerCase())){
+    return alert('Este cliente já está cadastrado.');
+  }
+
+  db.clientes.push({id:String(Date.now()),nome,emoji});
+
+  salvarLocal();
+  e.target.reset();
+  renderizarTudo();
+}
+
+function editarCliente(id){
+  const c=db.clientes.find(c=>String(c.id)===String(id));
+  if(!c)return;
+
+  const nome=prompt('Novo nome do cliente:',c.nome);
+  if(!nome||!nome.trim())return;
+
+  const novo=nome.trim();
+
+  if(db.clientes.some(x=>x.id!==c.id&&x.nome.toLowerCase()===novo.toLowerCase())){
+    return alert('Já existe um cliente com esse nome.');
+  }
+
+  const antigo=c.nome;
+  c.nome=novo;
+
+  if(db.saldos[antigo]){
+    db.saldos[novo]=db.saldos[antigo];
+    delete db.saldos[antigo];
+  }
+
+  Object.keys(db.consumoHoje).forEach(k=>{
+    if(k.startsWith(antigo+'_')){
+      const nk=novo+k.slice(antigo.length);
+      db.consumoHoje[nk]=db.consumoHoje[k];
+      delete db.consumoHoje[k];
+    }
+  });
+
+  db.pagamentos.forEach(p=>{
+    if(p.cliente===antigo)p.cliente=novo;
+  });
+
+  // Atualiza o nome nas vendas antigas
+  db.vendas.forEach(v=>{
+    if(v.cliente===antigo)v.cliente=novo;
+  });
+
+  if(clienteAtual===antigo)clienteAtual=novo;
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function removerCliente(id){
+  const c=db.clientes.find(c=>String(c.id)===String(id));
+  if(!c)return;
+
+  if(saldoCliente(c.nome)>0){
+    return alert('Não é possível excluir um cliente com dívida pendente. Receba o pagamento antes.');
+  }
+
+  if(!confirm(`Excluir o cliente ${c.nome}?`))return;
+
+  db.clientes=db.clientes.filter(x=>String(x.id)!==String(id));
+
+  if(clienteAtual===c.nome)clienteAtual=null;
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function salvarProduto(e){
+  e.preventDefault();
+
+  const nome=$('input-nome-prod').value.trim();
+  const custo=Number($('input-custo-prod').value);
+  const preco=Number($('input-preco-prod').value);
+
+  if(!nome||!Number.isFinite(custo)||custo<0||!Number.isFinite(preco)||preco<=0){
+    return alert('Informe nome, custo e preço válidos.');
+  }
+
+  db.produtos.push({id:Date.now(),nome,custo,preco});
+
+  salvarLocal();
+  e.target.reset();
+  renderizarTudo();
+}
+
+function editarProduto(id){
+  const p=db.produtos.find(p=>Number(p.id)===Number(id));
+  if(!p)return;
+
+  const nome=prompt('Nome do produto:',p.nome);
+  if(nome===null||!nome.trim())return;
+
+  const custo=prompt('Custo unitário:',p.custo);
+  if(custo===null)return;
+
+  const preco=prompt('Preço de venda:',p.preco);
+  if(preco===null)return;
+
+  const nCusto=Number(custo.replace(',','.'));
+  const nPreco=Number(preco.replace(',','.'));
+
+  if(!Number.isFinite(nCusto)||nCusto<0||!Number.isFinite(nPreco)||nPreco<=0){
+    return alert('Valores inválidos.');
+  }
+
+  p.nome=nome.trim();
+  p.custo=nCusto;
+  p.preco=nPreco;
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function removerProduto(id){
+  const usado=Object.values(db.consumoHoje).some(arr=>
+    arr.some(i=>Number(i.produtoId)===Number(id))
+  );
+
+  if(usado){
+    return alert('Este produto está em uma comanda aberta. Remova-o da comanda antes.');
+  }
+
+  if(!confirm('Excluir este produto?'))return;
+
+  db.produtos=db.produtos.filter(p=>Number(p.id)!==Number(id));
+
+  salvarLocal();
+  renderizarTudo();
+}
+
+function totalFiado(){
+  return Object.values(db.saldos).reduce((s,x)=>s+(Number(x.total)||0),0);
+}
+
+function totalRecebido(){
+  return db.pagamentos.reduce((s,p)=>s+(Number(p.valor)||0),0);
+}
+
+function totalGastos(){
+  return db.compras.reduce((s,c)=>s+(Number(c.valor)||0),0);
+}
+
+function totalVendido(){
+  return totalRecebido()+totalFiado();
+}
+
+function renderizarComanda(){
+  const data=$('event-date').value;
+  const cliente=db.clientes.find(c=>c.nome===clienteAtual);
+
+  $('selected-customer').textContent=cliente
+    ?`${cliente.emoji||'👤'} ${cliente.nome}`
+    :'👤 Selecione um cliente';
+
+  $('selected-balance').textContent=clienteAtual
+    ?`Saldo acumulado: ${dinheiro(saldoCliente(clienteAtual))}`
+    :'Saldo acumulado: R$ 0,00';
+
+  const itens=clienteAtual
+    ?(db.consumoHoje[chaveConsumo(clienteAtual,data)]||[])
+    :[];
+
+  $('order-items').innerHTML=itens.length?itens.map(i=>{
+    const p=db.produtos.find(p=>Number(p.id)===Number(i.produtoId));
+    if(!p)return '';
+
+    return `
+      <div class="order-item">
+        <div>
+          <strong>${i.qtd}x ${escapar(p.nome)}</strong>
+          <div class="helper">${dinheiro(p.preco)} cada</div>
+        </div>
+        <div class="quantity">
+          <strong>${dinheiro(p.preco*i.qtd)}</strong>
+          <button onclick="alterarQtd(${p.id},-1)">−</button>
+          <button onclick="alterarQtd(${p.id},1)">＋</button>
+        </div>
+      </div>`;
+  }).join(''):'<div class="empty"><span>🧾</span>Nenhum produto na comanda.</div>';
+
+  $('order-total').textContent=dinheiro(
+    clienteAtual?totalComanda(clienteAtual,data):0
+  );
+
+  const historico=clienteAtual?historicoCliente(clienteAtual):[];
+
+  $('customer-debts').innerHTML=historico.length
+    ?historico.slice().reverse().map(h=>`
+      <div class="list-row">
+        <div><strong>${escapar(h.descricao)}</strong><small>${escapar(h.data)}</small></div>
+        <strong>${dinheiro(h.valor)}</strong>
+      </div>`).join('')
+    :'<div class="empty">Nenhum débito anterior.</div>';
+}
+
+function renderizarClientes(){
+  $('client-count').textContent=`${db.clientes.length} clientes cadastrados`;
+  $('quick-clients').textContent=db.clientes.length;
+
+  $('customer-picker').innerHTML=db.clientes.length
+    ?db.clientes.map(c=>`
+      <button class="customer-card ${clienteAtual===c.nome?'selected':''}" onclick="selecionarCliente('${escapar(c.nome).replace(/'/g,"\\'")}')">
+        <span class="emoji">${c.emoji||'👤'}</span>
+        <span style="min-width:0">
+          <strong>${escapar(c.nome)}</strong>
+          <small>${saldoCliente(c.nome)>0?dinheiro(saldoCliente(c.nome))+' pendente':'Conta em dia'}</small>
+        </span>
+      </button>`).join('')
+    :'<div class="empty">Cadastre seu primeiro cliente.</div>';
+
+  $('lista-clientes').innerHTML=db.clientes.length
+    ?db.clientes.map(c=>`
+      <div class="list-row">
+        <div>
+          <strong>${c.emoji||'👤'} ${escapar(c.nome)}</strong>
+          <small>${saldoCliente(c.nome)>0?'Pendente: '+dinheiro(saldoCliente(c.nome)):'Sem pendências'}</small>
+        </div>
+        <div class="list-actions">
+          <button class="btn btn-blue btn-small" onclick="editarCliente('${c.id}')">Editar</button>
+          <button class="btn btn-danger btn-small" onclick="removerCliente('${c.id}')">Excluir</button>
+        </div>
+      </div>`).join('')
+    :'<div class="empty">Nenhum cliente cadastrado.</div>';
+
+  const filtroAtual=$('filter-payment-client').value;
+
+  $('filter-payment-client').innerHTML=
+    '<option value="">Todos os clientes</option>'+
+    db.clientes.map(c=>`<option value="${escapar(c.nome)}">${escapar(c.nome)}</option>`).join('');
+
+  $('filter-payment-client').value=filtroAtual;
+}
+
+function renderizarProdutos(){
+  $('product-count').textContent=`${db.produtos.length} produtos cadastrados`;
+  $('quick-products').textContent=db.produtos.length;
+
+  $('product-picker').innerHTML=db.produtos.length
+    ?db.produtos.map(p=>`
+      <button class="product-button" onclick="adicionarItem(${p.id})">
+        <strong>${escapar(p.nome)}</strong>
+        <span>${dinheiro(p.preco)}</span>
+      </button>`).join('')
+    :'<div class="empty">Cadastre produtos para começar.</div>';
+
+  $('lista-produtos').innerHTML=db.produtos.length
+    ?db.produtos.map(p=>`
+      <div class="list-row">
+        <div>
+          <strong>${escapar(p.nome)}</strong>
+          <small>Custo: ${dinheiro(p.custo)} · Venda: ${dinheiro(p.preco)} · Margem: ${dinheiro(p.preco-p.custo)}</small>
+        </div>
+        <div class="list-actions">
+          <button class="btn btn-blue btn-small" onclick="editarProduto(${p.id})">Editar</button>
+          <button class="btn btn-danger btn-small" onclick="removerProduto(${p.id})">Excluir</button>
+        </div>
+      </div>`).join('')
+    :'<div class="empty">Nenhum produto cadastrado.</div>';
+}
+
+function renderizarFinanceiro(){
+  const vendido=totalVendido();
+  const recebido=totalRecebido();
+  const fiado=totalFiado();
+  const gastos=totalGastos();
+  const lucro=vendido-gastos;
+
+  $('stat-sales').textContent=dinheiro(vendido);
+  $('stat-received').textContent=dinheiro(recebido);
+  $('stat-debt').textContent=dinheiro(fiado);
+  $('stat-expenses').textContent=dinheiro(gastos);
+  $('stat-profit').textContent=dinheiro(lucro);
+  $('stat-profit').style.color=lucro<0?'#ffb4b4':'white';
+
+  $('profit-products').innerHTML=db.produtos.length
+    ?db.produtos.map(p=>{
+      const margem=p.preco>0?(p.preco-p.custo)/p.preco*100:0;
+
+      return `
+        <div class="profit-card">
+          <div>
+            <strong>${escapar(p.nome)}</strong>
+            <small>Custo: ${dinheiro(p.custo)} · Venda: ${dinheiro(p.preco)}</small>
+          </div>
+          <div class="profit-value">
+            ${dinheiro(p.preco-p.custo)}
+            <small>${margem.toFixed(1)}% de margem</small>
+          </div>
+        </div>`;
+    }).join('')
+    :'<div class="empty">Cadastre produtos para visualizar as margens.</div>';
+}
+
+function renderizarCompras(){
+  $('total-compras').textContent=dinheiro(totalGastos());
+
+  $('lista-compras').innerHTML=db.compras.length
+    ?db.compras.map(c=>`
+      <div class="list-row">
+        <div>
+          <strong>${escapar(c.descricao)}</strong>
+          <small>${c.dataBR||formatarData(c.data)}</small>
+        </div>
+        <div class="list-actions">
+          <strong style="color:var(--red)">${dinheiro(c.valor)}</strong>
+          <button class="btn btn-danger btn-small" onclick="removerCompra(${c.id})">Excluir</button>
+        </div>
+      </div>`).join('')
+    :'<div class="empty"><span>🛒</span>Nenhuma compra ou despesa registrada.</div>';
+}
+
+function renderizarDevedores(){
+  const select=$('filter-debt-date');
+  const selecionada=select.value;
+  const datas=new Set();
+
+  Object.values(db.saldos).forEach(s=>(s.historico||[]).forEach(h=>{
+    if(h.dataIso)datas.add(h.dataIso);
+  }));
+
+  select.innerHTML='<option value="">Todas as datas</option>'+
+    [...datas].sort().reverse().map(d=>
+      `<option value="${d}">${formatarData(d)}</option>`
+    ).join('');
+
+  select.value=selecionada;
+
+  const devedores=db.clientes.map(c=>{
+    const historico=historicoCliente(c.nome).filter(h=>
+      !selecionada||h.dataIso===selecionada
+    );
+
+    const total=selecionada
+      ?historico.reduce((s,h)=>s+Number(h.valor),0)
+      :saldoCliente(c.nome);
+
+    return {...c,historico,total};
+  }).filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
+
+  const total=devedores.reduce((s,c)=>s+c.total,0);
+
+  $('total-a-receber').textContent=dinheiro(total);
+
+  $('lista-devedores').innerHTML=devedores.length
+    ?devedores.map(c=>`
+      <div class="panel" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+          <strong>${c.emoji||'👤'} ${escapar(c.nome)}</strong>
+          <strong style="color:var(--red)">${dinheiro(c.total)}</strong>
+        </div>
+        <div class="section-gap list">
+          ${c.historico.map(h=>`
+            <div class="list-row">
+              <div><strong>${escapar(h.descricao)}</strong><small>${h.data}</small></div>
+              <strong>${dinheiro(h.valor)}</strong>
+            </div>`).join('')}
+        </div>
+        <button class="btn btn-primary btn-block section-gap" onclick="selecionarCliente('${escapar(c.nome).replace(/'/g,"\\'")}');mudarAba('comandas')">Abrir conta e receber</button>
+      </div>`).join('')
+    :'<div class="empty" style="grid-column:1/-1"><span>🎉</span>Nenhuma pendência encontrada.</div>';
+}
+
+function renderizarHistorico(){
+  const filtro=$('filter-payment-client').value;
+  const lista=db.pagamentos.filter(p=>!filtro||p.cliente===filtro);
+
+  $('total-arrecadado').textContent=dinheiro(
+    lista.reduce((s,p)=>s+Number(p.valor),0)
+  );
+
+  $('quick-payments').textContent=db.pagamentos.length;
+
+  $('lista-pagamentos').innerHTML=lista.length
+    ?lista.map(p=>`
+      <div class="list-row">
+        <div>
+          <strong>${escapar(p.cliente)}</strong>
+          <small>${escapar(p.data)} · ${escapar(p.formaPagamento)}</small>
+        </div>
+        <div class="list-actions">
+          <strong style="color:var(--green2)">${dinheiro(p.valor)}</strong>
+          <button class="btn btn-danger btn-small" onclick="estornarPagamento(${p.id})">Estornar</button>
+        </div>
+      </div>`).join('')
+    :'<div class="empty"><span>🕘</span>Nenhum pagamento registrado.</div>';
+}
+
+function renderizarResumo(){
+  $('quick-debt').textContent=dinheiro(totalFiado());
+  $('quick-clients').textContent=db.clientes.length;
+  $('quick-products').textContent=db.produtos.length;
+  $('quick-payments').textContent=db.pagamentos.length;
+}
+
+/* =====================================================
+   FUNÇÕES DOS NOVOS GRAFICOS
+   ===================================================== */
+
+// Gera uma lista de datas do período escolhido
+function gerarDatas(periodo){
+  const datas=[];
+  const hoje=new Date();
+
+  for(let i=Number(periodo)-1;i>=0;i--){
+    const d=new Date(hoje);
+    d.setDate(hoje.getDate()-i);
+
+    const ano=d.getFullYear();
+    const mes=String(d.getMonth()+1).padStart(2,'0');
+    const dia=String(d.getDate()).padStart(2,'0');
+
+    datas.push(`${ano}-${mes}-${dia}`);
+  }
+
+  return datas;
+}
+
+// Agrupa os valores de vendas e despesas por dia
+function calcularDadosGraficos(periodo){
+  const datas=gerarDatas(periodo);
+
+  const vendasPorData={};
+  const gastosPorData={};
+
+  datas.forEach(data=>{
+    vendasPorData[data]=0;
+    gastosPorData[data]=0;
+  });
+
+  // Soma todas as vendas registradas
+  db.vendas.forEach(v=>{
+    if(vendasPorData[v.data]!==undefined){
+      vendasPorData[v.data]+=Number(v.valor)||0;
+    }
+  });
+
+  // Soma todas as compras e despesas
+  db.compras.forEach(c=>{
+    if(gastosPorData[c.data]!==undefined){
+      gastosPorData[c.data]+=Number(c.valor)||0;
+    }
+  });
+
+  const labels=datas.map(data=>{
+    const partes=data.split('-');
+    return `${partes[2]}/${partes[1]}`;
+  });
+
+  const vendas=datas.map(data=>Number(vendasPorData[data].toFixed(2)));
+
+  // Lucro operacional diário: vendas menos despesas registradas
+  const lucro=datas.map(data=>
+    Number((vendasPorData[data]-gastosPorData[data]).toFixed(2))
+  );
+
+  return {labels,vendas,lucro};
+}
+
+function atualizarGraficos(){
+  // Evita tentar desenhar os gráficos quando a aba está escondida
+  const pagina=$('page-financeiro');
+
+  if(!pagina||!pagina.classList.contains('active'))return;
+
+  if(typeof Chart==='undefined'){
+    console.error('A biblioteca Chart.js não foi carregada.');
+    return;
+  }
+
+  const periodoVendas=$('filtro-vendas').value;
+  const periodoLucro=$('filtro-lucro').value;
+
+  const dadosVendas=calcularDadosGraficos(periodoVendas);
+  const dadosLucro=calcularDadosGraficos(periodoLucro);
+
+  const contextoVendas=$('grafico-vendas').getContext('2d');
+  const contextoLucro=$('grafico-lucro').getContext('2d');
+
+  // Atualiza o gráfico de vendas
+  if(graficoVendas){
+    graficoVendas.data.labels=dadosVendas.labels;
+    graficoVendas.data.datasets[0].data=dadosVendas.vendas;
+    graficoVendas.update();
+  }else{
+    graficoVendas=new Chart(contextoVendas,{
+      type:'bar',
+      data:{
+        labels:dadosVendas.labels,
+        datasets:[{
+          label:'Vendas',
+          data:dadosVendas.vendas,
+          backgroundColor:'rgba(33,107,72,0.75)',
+          borderColor:'#216b48',
+          borderWidth:1,
+          borderRadius:6,
+          maxBarThickness:28
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{intersect:false,mode:'index'},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:context=>'Vendas: '+dinheiro(context.raw)
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            ticks:{
+              callback:value=>'R$ '+Number(value).toLocaleString('pt-BR')
+            },
+            grid:{color:'#edf1ed'}
+          },
+          x:{
+            grid:{display:false},
+            ticks:{maxTicksLimit:8,maxRotation:0}
+          }
+        }
+      }
+    });
+  }
+
+  // Atualiza o gráfico de lucro
+  if(graficoLucro){
+    graficoLucro.data.labels=dadosLucro.labels;
+    graficoLucro.data.datasets[0].data=dadosLucro.lucro;
+    graficoLucro.update();
+  }else{
+    graficoLucro=new Chart(contextoLucro,{
+      type:'line',
+      data:{
+        labels:dadosLucro.labels,
+        datasets:[{
+          label:'Resultado',
+          data:dadosLucro.lucro,
+          borderColor:'#3977b8',
+          backgroundColor:'rgba(57,119,184,0.13)',
+          pointBackgroundColor:'#3977b8',
+          pointRadius:3,
+          pointHoverRadius:6,
+          borderWidth:3,
+          fill:true,
+          tension:0.35
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{intersect:false,mode:'index'},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:context=>'Resultado: '+dinheiro(context.raw)
+            }
+          }
+        },
+        scales:{
+          y:{
+            ticks:{
+              callback:value=>'R$ '+Number(value).toLocaleString('pt-BR')
+            },
+            grid:{color:'#edf1ed'}
+          },
+          x:{
+            grid:{display:false},
+            ticks:{maxTicksLimit:8,maxRotation:0}
+          }
+        }
+      }
+    });
+  }
+}
+
+function renderizarTudo(){
+  renderizarResumo();
+  renderizarClientes();
+  renderizarProdutos();
+  renderizarComanda();
+  renderizarFinanceiro();
+  renderizarCompras();
+  renderizarDevedores();
+  renderizarHistorico();
+
+  atualizarDataEvento();
+
+  // Atualiza os gráficos quando a página financeira estiver aberta
+  atualizarGraficos();
+}
+
+function iniciar(){
+  preencherEmojis();
+
+  $('event-date').value=hojeISO();
+  $('input-data-compra').value=hojeISO();
+
+  $('today-label').textContent=new Date().toLocaleDateString('pt-BR',{
+    weekday:'long',
+    day:'2-digit',
+    month:'long',
+    year:'numeric'
+  });
+
+  $('event-date').addEventListener('change',()=>{
+    atualizarDataEvento();
+    renderizarComanda();
+  });
+
+  renderizarTudo();
+}
+
+iniciar();
+</script>
+</body>
+</html>
